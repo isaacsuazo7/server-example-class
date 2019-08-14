@@ -5,8 +5,13 @@ const Usuario = require('../models/usuario');
 const app = express();
 const mongoose = require('mongoose')
 
-app.get('/', (req, res) =>{
-    res.json('Hola Mundo')
+app.get('/usuario', (req, res) =>{
+    Usuario.find({},(err,usuarios)=>{
+        if(err) return res.status(500).send({message:`Error al realizar la peticion`})
+        if(!usuarios) return res.status(404).send({message: `No existen usuarios`})
+
+        res.send(200,{usuarios})
+    })
 });
 
 app.get('/usuario/:id', (req, res) =>{
@@ -67,7 +72,16 @@ app.put('/usuario/:id', (req, res) =>{
     });
 });
 
-app.delete('/usuario', (reqp, res) =>{
-    res.json('delete usuario');
+app.delete('/usuario/:id', (req, res) =>{
+    let id = req.params.id
+
+    Usuario.findById(id,(err, usuario)=>{
+        if(err) res.status(500).send({message: `Error al borrar usuario ${id}`})
+
+        usuario.remove(err=>{
+            if(err) res.status(500).send({message: `Error al borrar usuario ${id}`})
+            res.status(200).send({message: `Usuario eliminado`})
+        })
+    })
 })
 module.exports = app;   
